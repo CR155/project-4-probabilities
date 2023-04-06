@@ -62,8 +62,8 @@ void generate_datasets(const string& file_name, int& num_batches, int& batch_siz
         }
     }
 }
-
-void monte_carlo_algorithm(int num_batches, int batch_size, int percentage_bad_batches, int percentage_bad_chips, int samples, mt19937& generator) {
+/*
+void monte_carlo_algorithm(int num_batches, int batch_size,int percentage_bad_batches, int percentage_bad_chips, int samples, mt19937& generator) {
     uniform_int_distribution<int> chip_dist(0, batch_size - 1);
     int bad_batches_detected = 0;
 
@@ -90,6 +90,42 @@ void monte_carlo_algorithm(int num_batches, int batch_size, int percentage_bad_b
     }
 
     cout << "Percentage of bad batches detected: " << static_cast<double>(bad_batches_detected) / num_batches * 100
+         << "%" << endl;
+}
+*/
+void monte_carlo_algorithm(int num_batches, int batch_size, int percentage_bad_batches, int percentage_bad_chips, int samples, mt19937& generator) {
+    uniform_int_distribution<int> batch_dist(0, num_batches - 1);
+    uniform_int_distribution<int> chip_dist(0, batch_size - 1);
+
+    int bad_batches_detected = 0;
+
+    for (int i = 0; i < samples; ++i) {
+        int batch_index = batch_dist(generator);
+        ifstream ds_file("output_files/ds" + to_string(batch_index + 1) + ".txt");
+
+        int bad_chips_detected = 0;
+        for (int j = 0; j < samples; ++j) {
+            int chip_index = chip_dist(generator);
+            ds_file.seekg(chip_index, ios::beg);
+
+            char chip;
+            ds_file >> chip;
+
+            if (chip == 'b') {
+                bad_chips_detected++;
+            }
+        }
+
+        double probability_of_failure = pow(static_cast<double>(100 - percentage_bad_chips) / 100, samples);
+        double probability_of_bad_batch = static_cast<double>(bad_chips_detected) / samples;
+        if (probability_of_bad_batch > probability_of_failure) {
+            bad_batches_detected++;
+        }
+
+        ds_file.close();
+    }
+
+    cout << "Percentage of bad batches detected: " << static_cast<double>(bad_batches_detected) / samples * 100
          << "%" << endl;
 }
 
