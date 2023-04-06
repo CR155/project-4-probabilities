@@ -94,6 +94,7 @@ void monte_carlo_algorithm(int num_batches, int batch_size,int percentage_bad_ba
 }
 */
 void monte_carlo_algorithm(int num_batches, int batch_size, int percentage_bad_batches, int percentage_bad_chips, int samples, mt19937& generator) {
+    int bad_batches = num_batches * percentage_bad_batches / 100;
     uniform_int_distribution<int> batch_dist(0, num_batches - 1);
     uniform_int_distribution<int> chip_dist(0, batch_size - 1);
 
@@ -125,14 +126,14 @@ void monte_carlo_algorithm(int num_batches, int batch_size, int percentage_bad_b
         ds_file.close();
     }
 
-    cout << "Percentage of bad batches detected: " << static_cast<double>(bad_batches_detected) / samples * 100
+    cout << "Percentage of bad batches detected: " << static_cast<double>(bad_batches_detected) / bad_batches * 100
          << "%" << endl;
 }
 
 int main() {
     create_directory("output_files");
-    vector<string> test_files = {"../output_files/t1.txt", "../output_files/t2.txt", "../output_files/t3.txt",
-                                 "../output_files/t4.txt"};
+    vector<string> test_files = {"./output_files/t1.txt", "./output_files/t2.txt", "./output_files/t3.txt",
+                                 "./output_files/t4.txt"};
     mt19937 generator(static_cast<unsigned int>(time(nullptr)));
 
     for (size_t i = 0; i < test_files.size(); ++i) {
